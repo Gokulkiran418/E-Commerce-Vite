@@ -6,7 +6,7 @@ const ProductPage = ({ showNotification }) => {
   const [products, setProducts] = useState([]);
 
   useEffect(() => {
-    fetch('https://eshopplatform.vercel.app/api/products')
+    fetch(`${import.meta.env.VITE_API_URL}/api/products`)
       .then((res) => res.json())
       .then((data) => setProducts(data))
       .catch((err) => console.error('Error fetching products:', err));

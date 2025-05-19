@@ -8,19 +8,19 @@ const Cart = () => {
 
   // Fetch products and cart on mount
   useEffect(() => {
-    fetch('https://eshopplatform.vercel.app/api/products')
+    fetch(`${import.meta.env.VITE_API_URL}/api/products`)
       .then((res) => res.json())
       .then((data) => setProducts(data))
       .catch((err) => console.error('Error fetching products:', err));
 
-    fetch('https://eshopplatform.vercel.app/api/cart')
+    fetch(`${import.meta.env.VITE_API_URL}/api/cart`)
       .then((res) => res.json())
       .then((data) => setCart(data.cart || []))
       .catch((err) => console.error('Error fetching cart:', err));
   }, []);
 
   const addToCart = (productId) => {
-    fetch('https://eshopplatform.vercel.app/api/cart', {
+    fetch(`${import.meta.env.VITE_API_URL}/api/cart`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ productId, quantity: 1 }),
