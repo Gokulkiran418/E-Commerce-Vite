@@ -7,6 +7,7 @@ const Navbar = () => {
             <h1 className="text-white text-2xl font-bold tracking-tight">E-Shop</h1>
             <div className="space-x-6">
             <a href="/" className="text-white hover:text-blue-300 transition-colors duration-200">Home</a>
+            <a href="/productpage" className="text-white hover:text-blue-300 transition-colors duration-200">Products</a>
             <a href="/cart" className="text-white hover:text-blue-300 transition-colors duration-200">Cart</a>
             <a href="/checkout" className="text-white hover:text-blue-300 transition-colors duration-200">Checkout</a>
             </div>
