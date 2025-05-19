@@ -29,4 +29,4 @@ dist-ssr
 
 #Environment
 .env
-server/.env
+api/.env

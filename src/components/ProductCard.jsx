@@ -2,7 +2,7 @@ import React from 'react';
 
 const ProductCard = ({ product, showNotification }) => {
   const addToCart = () => {
-    fetch('http://localhost:5000/api/cart', {
+    fetch('https://eshopplatform.vercel.app/api/cart', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ productId: product.id, quantity: 1 }),

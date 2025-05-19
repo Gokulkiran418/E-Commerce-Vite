@@ -5,7 +5,7 @@ const Checkout = () => {
   const [message, setMessage] = useState('');
 
   const handleCheckout = () => {
-    fetch('http://localhost:5000/api/checkout', {
+    fetch('https://eshopplatform.vercel.app/api/checkout', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({}),
@@ -18,6 +18,7 @@ const Checkout = () => {
   return (
     <div>
       <Navbar />
+      
       <div className="container mx-auto p-4 pt-20">
         <h1 className="text-2xl font-bold mb-4">Checkout</h1>
         <button
