@@ -4,7 +4,7 @@ import Home from './pages/Home';
 import Cart from './pages/Cart';
 import Checkout from './pages/Checkout';
 import Notification from './components/Notification';
-import ProductPage from './pages/productpage'
+import ProductPage from './pages/productpage';
 
 function App() {
   const [notification, setNotification] = useState('');
@@ -18,7 +18,7 @@ function App() {
     <Router>
       <Notification message={notification} />
       <Routes>
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={<Home showNotification={showNotification} />} />
         <Route path="/productpage" element={<ProductPage showNotification={showNotification} />} />
         <Route path="/cart" element={<Cart />} />
         <Route path="/checkout" element={<Checkout />} />
