@@ -5,40 +5,95 @@ import Navbar from '../components/Navbar';
 const Cart = () => {
   const [cart, setCart] = useState([]);
   const [products, setProducts] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Fetch products and cart on mount
   useEffect(() => {
-    fetch(`${import.meta.env.VITE_API_URL}/api/products`)
-      .then((res) => res.json())
-      .then((data) => setProducts(data))
-      .catch((err) => console.error('Error fetching products:', err));
+    const fetchData = async () => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const [productsRes, cartRes] = await Promise.all([
+          fetch(`${import.meta.env.VITE_API_URL}/api/products`),
+          fetch(`${import.meta.env.VITE_API_URL}/api/cart`),
+        ]);
 
-    fetch(`${import.meta.env.VITE_API_URL}/api/cart`)
-      .then((res) => res.json())
-      .then((data) => setCart(data.cart || []))
-      .catch((err) => console.error('Error fetching cart:', err));
-  }, []);
+        if (!productsRes.ok || !cartRes.ok) {
+          throw new Error('Failed to fetch data');
+        }
 
-  const addToCart = (productId) => {
-    fetch(`${import.meta.env.VITE_API_URL}/api/cart`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ productId, quantity: 1 }),
-    })
-      .then((res) => res.json())
-      .then((data) => setCart(data.cart || []))
-      .catch((err) => console.error('Error adding to cart:', err));
+        const productsData = await productsRes.json();
+        const cartData = await cartRes.json();
+
+        console.log('Products fetched:', productsData);
+        console.log('Cart fetched:', cartData);
+
+        setProducts(productsData);
+        setCart(cartData.cart || []);
+      } catch (err) {
+        console.error('Error fetching data:', err);
+        setError('Failed to load cart. Please try again.');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []); // Empty dependency ensures fetch on mount
+
+  const addToCart = async (productId) => {
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/cart`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ productId, quantity: 1 }),
+      });
+      if (!res.ok) throw new Error('Failed to add to cart');
+      const data = await res.json();
+      console.log('Add to cart response:', data);
+      setCart(data.cart || []);
+    } catch (err) {
+      console.error('Error adding to cart:', err);
+      setError('Failed to add to cart. Please try again.');
+    }
   };
 
-  // Calculate totals
   const getProductTotal = (item) => {
     const product = products.find((p) => p.id === item.productId);
-    return product ? (product.price * item.quantity).toFixed(2) : 0;
+    if (!product) {
+      console.warn(`Product not found for productId: ${item.productId}`);
+      return 0;
+    }
+    return (product.price * item.quantity).toFixed(2);
   };
 
   const cartTotal = cart
-    .reduce((sum, item) => sum + parseFloat(getProductTotal(item)), 0)
+    .reduce((sum, item) => sum + parseFloat(getProductTotal(item) || 0), 0)
     .toFixed(2);
+
+  if (isLoading) {
+    return (
+      <div>
+        <Navbar />
+        <div className="container mx-auto p-4 pt-20">
+          <h1 className="text-2xl font-bold mb-4">Cart</h1>
+          <p>Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div>
+        <Navbar />
+        <div className="container mx-auto p-4 pt-20">
+          <h1 className="text-2xl font-bold mb-4">Cart</h1>
+          <p className="text-red-500">{error}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -55,7 +110,7 @@ const Cart = () => {
                 return product ? (
                   <div
                     key={index}
-                    className="flex items-center bg-white p-4 rounded-lg shadow-md w-64"
+                    className="flex items-center bg-white p-4 rounded-lg shadow-md w-full sm:w-64"
                   >
                     <img
                       src={product.image_url}
@@ -73,7 +128,6 @@ const Cart = () => {
                 );
               })}
             </div>
-            {/* Total and Checkout Box */}
             <div className="w-full bg-gray-900 text-white p-6 rounded-lg mt-6">
               <h2 className="text-xl font-bold mb-4">Order Summary</h2>
               {cart.map((item, index) => {
@@ -97,7 +151,12 @@ const Cart = () => {
             </div>
           </>
         )}
-       
+        <button
+          onClick={() => addToCart(1)}
+          className="mt-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+        >
+          Add Product 1 to Cart
+        </button>
       </div>
     </div>
   );
