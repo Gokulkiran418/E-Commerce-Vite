@@ -18,7 +18,7 @@ const ProductCard = ({ product, showNotification }) => {
   return (
     <div className="border rounded-lg p-4 bg-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
       <img
-        src={'/src'+product.image_url}
+        src={product.image_url}
         alt={product.name}
         className="w-full h-48 object-cover rounded-md mb-4"
       />
