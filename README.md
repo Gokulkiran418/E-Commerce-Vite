@@ -1,23 +1,21 @@
-# E-commerce Platform
-
-A full-stack e-commerce web application built with React, Vite, Tailwind CSS, Node.js, Express, and Neon PostgreSQL. Features product listings, a cart, and checkout functionality, with AI integration and Vercel deployment.
-
-## Table of Contents
-- [Features](#features)
-- [Tech Stack](#tech-stack)
-- [Setup](#setup)
-- [Running Locally](#running-locally)
-- [Deployment](#deployment)
-- [Project Structure](#project-structure)
+# Sports Shoe E-Commerce Platform
+A full-stack e-commerce app for sports shoes, built with React, Vite, Node.js, Express, and Neon PostgreSQL, deployed on Vercel.
 
 ## Features
-- Product listings with responsive grid and hover effects
-- Navigation bar with Home, Cart, and Checkout links
-- Placeholder for cart and checkout functionality (to be completed)
-- Scalable front-end architecture
+- Browse products with images, names, and prices.
+- Add products to a persistent cart.
+- View cart with totals and proceed to checkout.
+- Responsive design for mobile and desktop.
+
+## Setup
+1. Clone: `git clone https://github.com/your-username/ecommerce-platform.git`
+2. Install: `cd ecommerce-platform && npm install`
+3. Back-end: `cd api && npm install`
+4. Set `.env`: `VITE_API_URL=http://localhost:5000` (front-end), `DATABASE_URL=your-neon-url` (back-end).
+5. Run: `npm run dev` (front-end), `npm start` (back-end).
+6. Deploy: Configure Vercel with `VITE_API_URL`, `DATABASE_URL`.
 
 ## Tech Stack
-- **Front-End**: React (18.x), Vite (5.x), Tailwind CSS (3.x)
-- **Back-End**: Node.js (20.x), Express (4.x) (to be implemented)
-- **Database**: Neon PostgreSQL (to be implemented)
-- **Deployment**: Vercel
+- Front-end: React, Vite, Tailwind CSS, React Router
+- Back-end: Node.js, Express, Neon PostgreSQL
+- Deployment: Vercel
