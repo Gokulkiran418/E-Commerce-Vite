@@ -9,8 +9,7 @@
       "src": "package.json",
       "use": "@vercel/static-build",
       "config": {
-        "distDir": "dist",
-        "buildCommand": "npm run build"
+        "distDir": "dist"
       }
     }
   ],
@@ -20,14 +19,11 @@
       "dest": "api/index.js"
     },
     {
-      "src": "/(.*)",
-      "dest": "/dist/index.html"
-    }
-  ],
-  "rewrites": [
+      "handle": "filesystem"
+    },
     {
-      "source": "/((?!api/).*)",
-      "destination": "/dist/index.html"
+      "src": "/(.*)",
+      "dest": "/index.html"
     }
   ]
 }
