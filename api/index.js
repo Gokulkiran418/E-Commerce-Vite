@@ -30,7 +30,7 @@ app.use(express.json());
 
 app.get('/api/products', async (req, res) => {
   try {
-    const result = await pool.query('SELECT * FROM products');
+    const result = await pool.query('SELECT * FROM products ORDER BY id');
     res.json(result.rows);
   } catch (err) {
     console.error('Error in /api/products:', err.stack);
