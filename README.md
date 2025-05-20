@@ -8,7 +8,7 @@ A full-stack e-commerce app for sports shoes, built with React, Vite, Node.js, E
 - Responsive design for mobile and desktop.
 
 ## Setup
-1. Clone: `git clone https://github.com/your-username/ecommerce-platform.git`
+1. Clone: `git clone https://github.com/Gokulkiran418/E-Commerce-Vite.git`
 2. Install: `cd ecommerce-platform && npm install`
 3. Back-end: `cd api && npm install`
 4. Set `.env`: `VITE_API_URL=http://localhost:5000` (front-end), `DATABASE_URL=your-neon-url` (back-end).
