@@ -33,8 +33,8 @@ const ProductPage = ({ showNotification }) => {
       <div>
         <Navbar />
         <div className="container mx-auto p-4 pt-20">
-          <h1 className="text-2xl font-bold mb-4">Products</h1>
-          <p>Loading...</p>
+          <h1 className="text-2xl font-bold mb-4">Products (Using Neon PostgreSQL)</h1>
+          <p>Loading products from database.....</p>
         </div>
       </div>
     );
@@ -45,7 +45,7 @@ const ProductPage = ({ showNotification }) => {
       <div>
         <Navbar />
         <div className="container mx-auto p-4 pt-20">
-          <h1 className="text-2xl font-bold mb-4">Products</h1>
+          <h1 className="text-2xl font-bold mb-4">Products (Using Neon PostgreSQL)</h1>
           <p className="text-red-500">{error}</p>
         </div>
       </div>
@@ -56,7 +56,7 @@ const ProductPage = ({ showNotification }) => {
     <div>
       <Navbar />
       <div className="container mx-auto p-4 pt-20">
-        <h1 className="text-2xl font-bold mb-4">Products</h1>
+        <h1 className="text-2xl font-bold mb-4">Products (Using Neon PostgreSQL)</h1>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {products.map((product) => (
             <ProductCard key={product.id} product={product} showNotification={showNotification} />
