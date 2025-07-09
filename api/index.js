@@ -1,10 +1,13 @@
 const express = require('express');
 const cors = require('cors');
 const { Pool } = require('pg');
+const Stripe = require('stripe');
 require('dotenv').config();
 
 const app = express();
 const port = process.env.PORT || 5000;
+
+const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -67,17 +70,42 @@ app.post('/api/cart', async (req, res) => {
 
 app.post('/api/checkout', async (req, res) => {
   try {
-    const result = await pool.query('SELECT * FROM cart');
+    const result = await pool.query('SELECT cart.*, products.name, products.price FROM cart JOIN products ON cart.product_id = products.id');
     if (result.rows.length === 0) {
       return res.status(400).json({ error: 'Cart is empty' });
     }
-    const order = { items: result.rows.map(item => ({ productId: item.product_id, quantity: item.quantity })), timestamp: new Date() };
-    await pool.query('DELETE FROM cart');
-    console.log('POST /api/checkout:', order);
-    res.json({ message: 'Checkout successful', order });
+
+    const lineItems = result.rows.map(item => ({
+      price_data: {
+        currency: 'usd',
+        product_data: { name: item.name },
+        unit_amount: Math.round(item.price * 100),
+      },
+      quantity: item.quantity,
+    }));
+
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      line_items: lineItems,
+      mode: 'payment',
+      success_url: `${process.env.CLIENT_URL}/checkout?success=true`,
+      cancel_url: `${process.env.CLIENT_URL}/checkout?canceled=true`,
+    });
+
+    res.json({ sessionId: session.id });
   } catch (err) {
     console.error('Error in /api/checkout:', err.stack);
-    res.status(500).json({ error: 'Server error' });
+    res.status(500).json({ error: 'Checkout error' });
+  }
+});
+
+app.post('/api/cart/empty', async (req, res) => {
+  try {
+    await pool.query('DELETE FROM cart');
+    res.json({ message: 'Cart emptied successfully' });
+  } catch (err) {
+    console.error('Error emptying cart:', err.stack);
+    res.status(500).json({ error: 'Failed to empty cart' });
   }
 });
 
