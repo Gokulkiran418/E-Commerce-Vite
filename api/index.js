@@ -99,6 +99,22 @@ app.post('/api/checkout', async (req, res) => {
   }
 });
 
+app.post('/api/cart/delete', async (req, res) => {
+  const { productId } = req.body;
+  if (!productId) {
+    return res.status(400).json({ error: 'Product ID is required' });
+  }
+
+  try {
+    await pool.query('DELETE FROM cart WHERE product_id = $1', [productId]);
+    res.json({ message: 'Item deleted from cart' });
+  } catch (err) {
+    console.error('Error deleting item from cart:', err.stack);
+    res.status(500).json({ error: 'Failed to delete item from cart' });
+  }
+});
+
+
 app.post('/api/cart/empty', async (req, res) => {
   try {
     await pool.query('DELETE FROM cart');
