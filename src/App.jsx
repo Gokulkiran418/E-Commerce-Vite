@@ -19,7 +19,7 @@ function App() {
       <Notification message={notification} />
       <Routes>
         <Route path="/" element={<Home showNotification={showNotification} />} />
-        <Route path="/productpage" element={<ProductPage showNotification={showNotification} />} />
+        <Route path="/products" element={<ProductPage showNotification={showNotification} />} />
         <Route path="/cart" element={<Cart />} />
         <Route path="/checkout" element={<Checkout />} />
       </Routes>
