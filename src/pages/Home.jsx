@@ -1,70 +1,164 @@
-import React from 'react';
-import Navbar from '../components/Navbar';
+import React, { useEffect, useRef, useState } from 'react';
+import { animate, stagger } from 'animejs';
+import { useNavigate } from 'react-router-dom';
 
-const Home = ({ showNotification }) => {
+const Home = () => {
+  const bgRef = useRef(null);
+  const loaderRef = useRef(null);
+  const textRef = useRef(null);
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
+
+  // Loader fade-out shortly after mount
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      animate(loaderRef.current, {
+        opacity: [1, 0],
+        duration: 300,
+        easing: 'easeInOutQuad',
+        complete: () => setLoading(false)
+      });
+    }, 200);
+    return () => clearTimeout(timeout);
+  }, []);
+
+  // Main animations
+  useEffect(() => {
+    if (!loading) {
+      const colors = ['#0a0a0a', '#1a1a1a', '#0f0a1d', '#0a1d3f', '#1d0f3f', '#3f0a1d'];
+      let idx = 0;
+      const bgInterval = setInterval(() => {
+        const color = colors[idx % colors.length];
+        animate(bgRef.current, {
+          backgroundColor: color,
+          duration: 3000,
+          easing: 'easeInOutQuad'
+        });
+        const circleEl = document.querySelector('.quantum-circle');
+        if (circleEl) circleEl.style.boxShadow = `0 0 60px ${color}`;
+        idx++;
+      }, 3500);
+
+      // Button pulse
+      animate('.futuristic-btn', {
+        scale: [1, 1.05],
+        opacity: [0.85, 1],
+        delay: stagger(250),
+        easing: 'easeInOutSine',
+        duration: 1200,
+        direction: 'alternate',
+        loop: true
+      });
+
+      // Headline and circle initial scale
+      animate([textRef.current, '.quantum-circle'], {
+        scale: [0.7, 1.15],
+        easing: 'easeInOutSine',
+        duration: 3000
+      });
+
+      // Glow pulse effect on circle
+      animate('.quantum-circle', {
+        boxShadow: [
+          (el) => el.style.boxShadow,
+          (el) => el.style.boxShadow.replace('60px', '20px')
+        ],
+        easing: 'easeInOutSine',
+        duration: 3000,
+        direction: 'alternate',
+        loop: true
+      });
+
+      // Horizontal lines move
+      animate('.animated-h-line', {
+        translateX: ['-100%', '100%'],
+        duration: 4000,
+        easing: 'linear',
+        loop: true
+      });
+      // Vertical lines move
+      animate('.animated-v-line', {
+        translateY: ['-100%', '100%'],
+        duration: 4000,
+        easing: 'linear',
+        loop: true
+      });
+
+      return () => clearInterval(bgInterval);
+    }
+  }, [loading]);
+
   return (
-    <div className="min-h-screen relative">
-      <Navbar />
-      {/* Background image container */}
-      <div
-        className="absolute inset-0 w-full h-full bg-cover bg-center z-0"
-        style={{ backgroundImage: `url('/images/background_img.jpg')` }}
-      ></div>
-      {/* Content container */}
-      <div className="relative z-10 container mx-auto p-4 pt-20 flex flex-col md:flex-row">
-        {/* Store info and reviews section */}
-        <div className="md:w-1/2 flex flex-col gap-6">
-          {/* Store info */}
-          <div className="bg-black bg-opacity-70 p-6 rounded-lg text-white">
-            <h2 className="text-3xl font-bold mb-4">Welcome to E-Shop</h2>
-            <p className="text-lg mb-4">
-              Discover the ultimate destination for premium sports shoes! At E-Shop, we offer a curated selection of high-performance footwear designed for style and comfort.
-            </p>
-            <p className="text-lg">
-              Enjoy <span className="font-semibold">lightning-fast shipping</span> to get your favorite sneakers delivered to your door in no time. Shop now and step up your game!
-            </p>
+    <>
+      {loading && (
+        <div ref={loaderRef} className="fixed inset-0 z-50 flex items-center justify-center bg-black">
+          <div className="w-16 h-16 border-4 border-t-cyan-400 border-gray-700 rounded-full animate-spin" />
+        </div>
+      )}
+
+      <div className="min-h-screen relative overflow-hidden bg-black" ref={bgRef}>
+        {/* Gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-br from-[#0f0a1d] via-[#1d0f3f] to-[#0a1d3f] opacity-50 z-0" />
+
+        {/* Decorative neon static lines */}
+        <div className="animated-h-line absolute top-1/4 left-0 w-full h-0.5 bg-cyan-400 opacity-20 z-10" />
+        <div className="animated-h-line absolute top-1/2 left-0 w-full h-0.5 bg-magenta-400 opacity-20 z-10" />
+        <div className="animated-h-line absolute bottom-1/4 left-0 w-full h-0.5 bg-lime-400 opacity-20 z-10" />
+
+        <div className="animated-v-line absolute top-0 left-1/4 w-0.5 h-full bg-purple-400 opacity-20 z-10" />
+        <div className="animated-v-line absolute top-0 left-1/2 w-0.5 h-full bg-pink-400 opacity-20 z-10" />
+        <div className="animated-v-line absolute top-0 left-3/4 w-0.5 h-full bg-yellow-400 opacity-20 z-10" />
+
+        <div className="relative z-20 flex flex-col items-center text-center text-white pt-24 px-4">
+          <h1
+            ref={textRef}
+            className="text-5xl sm:text-6xl font-extrabold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-magenta-300"
+          >
+            Step into the Future
+          </h1>
+          <p className="text-xl mb-8 max-w-2xl opacity-80">
+            Next-gen sports footwear with cutting-edge designs and neon energy.
+          </p>
+
+          <div className="flex flex-col sm:flex-row gap-6 justify-center mb-12">
+            {['productpage','Cart','Checkout'].map((label) => (
+              <button
+                key={label}
+                className="futuristic-btn px-12 py-4 bg-white bg-opacity-20 backdrop-blur-md text-white text-lg font-bold rounded-xl border border-white border-opacity-30 hover:bg-opacity-30 transition"
+                onClick={() => navigate(`/${label.toLowerCase()}`)}
+              >
+                {label}
+              </button>
+            ))}
           </div>
-          {/* Customer reviews */}
-          <div className="bg-black bg-opacity-70 p-6 rounded-lg text-white">
-            <h3 className="text-2xl font-bold mb-4">Customer Reviews</h3>
-            <div className="space-y-4">
-              {/* Review 1 */}
-              <div>
-                <div className="flex items-center mb-2">
-                  <span className="text-yellow-400">★★★★★</span>
-                  <span className="ml-2 font-semibold">John S.</span>
-                </div>
-                <p className="text-sm">
-                  Absolutely love my new running shoes! The quality is top-notch, and they arrived in just two days. E-Shop is my go-to for sneakers!
-                </p>
-              </div>
-              {/* Review 2 */}
-              <div>
-                <div className="flex items-center mb-2">
-                  <span className="text-yellow-400">★★★★★</span>
-                  <span className="ml-2 font-semibold">Emma L.</span>
-                </div>
-                <p className="text-sm">
-                  Fantastic experience! The shoes are super comfortable, and the fast shipping was a game-changer. Highly recommend E-Shop!
-                </p>
-              </div>
-              {/* Review 3 */}
-              <div>
-                <div className="flex items-center mb-2">
-                  <span className="text-yellow-400">★★★★★</span>
-                  <span className="ml-2 font-semibold">Michael R.</span>
-                </div>
-                <p className="text-sm">
-                  Best shoe store ever! Stylish designs and unbeatable delivery speed. My new kicks are perfect for the gym. 5 stars!
-                </p>
-              </div>
-            </div>
+
+          <div
+            className="quantum-circle mx-auto w-64 h-64 sm:w-80 sm:h-80 md:w-96 md:h-96 rounded-full bg-cover bg-center z-20"
+            style={{ backgroundImage: "url('/images/quantum.jpg')" }}
+          />
+        </div>
+
+        <div className="relative z-20 container mx-auto mt-24 px-4">
+          <div className="bg-black bg-opacity-70 p-10 rounded-2xl text-white mx-auto max-w-4xl border border-cyan-600">
+            <h2 className="text-3xl font-bold mb-4">Our Vision</h2>
+            <p className="text-lg opacity-90">
+              We blend futuristic aesthetics with unparalleled comfort—powered by sustainable, smart sole technology.
+            </p>
           </div>
         </div>
-        {/* Empty space on right for desktop */}
-        <div className="md:w-1/2"></div>
+
+        <footer className="relative z-20 mt-32 py-8 bg-black bg-opacity-80 text-gray-300">
+          <div className="container mx-auto px-4 text-center">
+            <div className="flex justify-center gap-8 mb-6 opacity-80">
+              <a href="/about" className="hover:text-white">About</a>
+              <a href="/contact" className="hover:text-white">Contact</a>
+              <a href="/faq" className="hover:text-white">FAQs</a>
+            </div>
+            <p className="opacity-60">&copy; {new Date().getFullYear()} E-Shop Futuristic</p>
+          </div>
+        </footer>
       </div>
-    </div>
+    </>
   );
 };
 
