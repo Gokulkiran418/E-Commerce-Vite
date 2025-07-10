@@ -125,6 +125,21 @@ const Checkout = () => {
               {isLoading ? 'Redirecting to Payment...' : 'Pay with Card'}
             </button>
             <p className="text-sm text-gray-400 mt-2 text-center">Secure payment powered by Stripe</p>
+            <div className="mt-6 bg-yellow-50 border border-yellow-300 p-4 rounded-lg text-sm text-gray-800">
+              <p className="font-semibold mb-2">💳 Stripe Test Payment</p>
+              <ul className="list-disc list-inside space-y-1">
+                <li>
+                  <span className="font-medium">Success:</span> 4242 4242 4242 4242 any future expiry, CVC, ZIP, any email, any name
+                </li>
+                <li>
+                  <span className="font-medium">Insufficient funds:</span> 4000 0000 0000 9995 any future expiry, CVC, ZIP, any email, any name
+                </li>
+                <li>
+                  <span className="font-medium">Card declined:</span> 4000 0000 0000 0002 any future expiry, CVC, ZIP, any email, any name
+                </li>
+              </ul>
+            </div>
+
           </div>
         </div>
       </div>
