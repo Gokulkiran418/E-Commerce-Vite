@@ -1,13 +1,18 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect, useRef } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import { Trash2 } from 'lucide-react';
+import { animate } from 'animejs';
 
 const Cart = () => {
   const [cart, setCart] = useState([]);
   const [products, setProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const cartRef = useRef(null);
+  const emptyRef = useRef(null);
+  const btnRef = useRef(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -18,14 +23,21 @@ const Cart = () => {
           fetch(`${import.meta.env.VITE_API_URL}/api/products`),
           fetch(`${import.meta.env.VITE_API_URL}/api/cart`),
         ]);
-
         if (!productsRes.ok || !cartRes.ok) throw new Error('Failed to fetch data');
-
-        const productsData = await productsRes.json();
-        const cartData = await cartRes.json();
-        setProducts(productsData);
-        setCart(cartData.cart || []);
-      } catch (err) {
+        setProducts(await productsRes.json());
+        const rawCart = (await cartRes.json()).cart || [];
+        const aggregated = Object.values(
+          rawCart.reduce((acc, item) => {
+            if (acc[item.productId]) {
+              acc[item.productId].quantity += item.quantity;
+            } else {
+              acc[item.productId] = { ...item };
+            }
+            return acc;
+          }, {})
+        );
+        setCart(aggregated);
+      } catch {
         setError('Failed to load cart. Please try again.');
       } finally {
         setIsLoading(false);
@@ -34,93 +46,154 @@ const Cart = () => {
     fetchData();
   }, []);
 
+  useEffect(() => {
+    if (cart.length > 0 && cartRef.current) {
+      animate(cartRef.current, { translateY: [20, 0], opacity: [0, 1], duration: 800, easing: 'easeOutExpo' });
+    }
+  }, [cart]);
+
+  useEffect(() => {
+    if (!isLoading && cart.length === 0) {
+      if (emptyRef.current) {
+        animate(emptyRef.current, { opacity: [0, 1], duration: 1000, easing: 'easeInOutSine' });
+      }
+      if (btnRef.current) {
+        animate(btnRef.current, { scale: [0.9, 1.05], duration: 800, easing: 'easeOutBack' });
+      }
+    }
+  }, [isLoading, cart.length]);
+
   const getProductTotal = (item) => {
     const product = products.find(p => p.id === item.productId);
     return product ? (product.price * item.quantity).toFixed(2) : '0.00';
   };
 
   const handleDelete = async (productId) => {
-    try {
-      await fetch(`${import.meta.env.VITE_API_URL}/api/cart/delete`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ productId }),
-      });
-      setCart(prev => prev.filter(item => item.productId !== productId));
-    } catch (err) {
-      console.error('Error deleting item from cart:', err);
+    const itemRef = document.getElementById(`cart-item-${productId}`);
+    if (itemRef) {
+      await animate(itemRef, { opacity: [1, 0], scale: [1, 0.8], duration: 400, easing: 'easeInOutQuad' });
     }
+
+    setCart(prev => prev.filter(item => item.productId !== productId));
+
+    await fetch(`${import.meta.env.VITE_API_URL}/api/cart/delete`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ productId })
+    });
   };
 
-  const cartTotal = cart
-    .reduce((sum, item) => sum + parseFloat(getProductTotal(item)), 0)
-    .toFixed(2);
+  const updateQuantity = async (productId, delta) => {
+    setCart(prev => prev.map(item => {
+      if (item.productId === productId) {
+        const newQty = Math.max(1, item.quantity + delta);
+        return { ...item, quantity: newQty };
+      }
+      return item;
+    }));
+
+    await fetch(`${import.meta.env.VITE_API_URL}/api/cart/update`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ productId, delta }),
+    });
+  };
+
+  const handleCheckout = async () => {
+    await animate(btnRef.current, { scale: [1, 1.05, 1], duration: 400, easing: 'easeInOutSine' });
+    navigate('/checkout');
+  };
+
+  const cartTotal = cart.reduce((sum, item) => sum + parseFloat(getProductTotal(item)), 0).toFixed(2);
 
   if (isLoading) return (
-    <><Navbar /><div className="container mx-auto p-4 pt-20"><p>Loading...</p></div></>
-  );
-  if (error) return (
-    <><Navbar /><div className="container mx-auto p-4 pt-20"><p className="text-red-500">{error}</p></div></>
+    <>
+      <Navbar />
+      <div className='min-h-screen flex flex-col items-center justify-center bg-black' ref={cartRef}>
+        <div className='mt-20 flex flex-col items-center'>
+          <div className='relative w-16 h-16'>
+            <div className='absolute top-0 left-0 w-16 h-16 border-2 border-cyan-300 rounded-full animate-ping'></div>
+            <div className='absolute top-0 left-0 w-16 h-16 border-2 border-pink-300 border-dashed rounded-full animate-spin'></div>
+          </div>
+          <p className='mt-4 text-lg text-white animate-pulse'>Loading cart...</p>
+        </div>
+      </div>
+    </>
   );
 
+  if (error) return <><Navbar /><div className="min-h-screen flex items-center justify-center bg-black"><p className="text-red-500">{error}</p></div></>;
+
+  if (cart.length === 0) {
+    return (
+      <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center">
+        <Navbar />
+        <div ref={emptyRef} className="text-center">
+          <p className="text-2xl text-cyan-300 mb-6">Your cart is empty</p>
+          <button
+            ref={btnRef}
+            onClick={() => navigate('/products')}
+            className="bg-cyan-600 text-white px-6 py-3 rounded-lg hover:bg-cyan-700 transition-transform hover:scale-105"
+          >
+            Add Products
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div>
+    <div className="min-h-screen bg-black text-white overflow-hidden relative">
       <Navbar />
-      <div className="container mx-auto p-4 pt-20">
+      <div className="container mx-auto p-4 pt-24" ref={cartRef}>
         <h1 className="text-3xl font-bold mb-6">Your Cart</h1>
-        {cart.length === 0 ? (
-          <p className="text-gray-600">Your cart is empty.</p>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              {cart.map((item, idx) => {
-                const product = products.find(p => p.id === item.productId);
-                if (!product) return <p key={idx}>Product not found</p>;
-                return (
-                  <div key={idx} className="flex items-center bg-white p-4 rounded-lg shadow mb-4 justify-between">
-                    <div className="flex items-center">
-                      <img src={product.image_url} alt={product.name} className="w-24 h-24 object-cover rounded mr-4" />
-                      <div>
-                        <h3 className="text-lg font-semibold">{product.name}</h3>
-                        <p className="text-gray-600">${product.price}</p>
-                        <p className="text-gray-600">Qty: {item.quantity}</p>
-                        <p className="font-bold mt-2">Subtotal: ${getProductTotal(item)}</p>
-                      </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            {cart.map((item) => {
+              const product = products.find(p => p.id === item.productId);
+              return (
+                <div key={item.productId} id={`cart-item-${item.productId}`} className="flex items-center bg-[#111] p-4 rounded-lg mb-4 border border-cyan-500">
+                  <img src={product.image_url} alt={product.name} className="w-24 h-24 rounded mr-4" />
+                  <div className="flex-1">
+                    <h3 className="text-lg text-cyan-300 font-semibold">{product.name}</h3>
+                    <p className="text-cyan-400">${product.price}</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <button onClick={() => updateQuantity(item.productId, -1)} className="px-2 bg-gray-700 rounded">-</button>
+                      <p className="text-white">Qty: {item.quantity}</p>
+                      <button onClick={() => updateQuantity(item.productId, 1)} className="px-2 bg-gray-700 rounded">+</button>
                     </div>
-                    <button
-                      onClick={() => handleDelete(item.productId)}
-                      className="text-red-500 hover:text-red-700"
-                    >
-                      <Trash2 size={20} />
-                    </button>
+                    <p className="text-cyan-200 font-bold mt-1">Subtotal: ${getProductTotal(item)}</p>
                   </div>
-                );
-              })}
-            </div>
-            <div className="bg-gray-100 p-6 rounded-lg shadow">
-              <h2 className="text-2xl font-bold mb-4">Order Summary</h2>
-              {cart.map((item, idx) => {
-                const product = products.find(p => p.id === item.productId);
-                if (!product) return null;
-                return (
-                  <div key={idx} className="flex justify-between mb-3">
-                    <span>{product.name} x {item.quantity}</span>
-                    <span>${getProductTotal(item)}</span>
-                  </div>
-                );
-              })}
-              <div className="flex justify-between text-xl font-bold border-t pt-4 mt-4">
-                <span>Total</span>
-                <span>${cartTotal}</span>
-              </div>
-              <Link to="/checkout">
-                <button className="mt-6 w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition">
-                  Proceed to Checkout
-                </button>
-              </Link>
-            </div>
+                  <button onClick={() => handleDelete(item.productId)} className="text-red-500 hover:text-red-700">
+                    <Trash2 size={20} />
+                  </button>
+                </div>
+              );
+            })}
           </div>
-        )}
+          <div className="bg-[#111] p-6 rounded-lg border border-pink-500">
+            <h2 className="text-2xl font-bold text-pink-300 mb-4">Order Summary</h2>
+            {cart.map((item) => {
+              const product = products.find(p => p.id === item.productId);
+              return (
+                <div key={item.productId} className="flex justify-between text-white mb-2">
+                  <span>{product.name} x {item.quantity}</span>
+                  <span>${getProductTotal(item)}</span>
+                </div>
+              );
+            })}
+            <div className="flex justify-between text-xl font-bold text-cyan-200 border-t pt-4 mt-4">
+              <span>Total</span>
+              <span>${cartTotal}</span>
+            </div>
+            <button
+              onClick={handleCheckout}
+              ref={btnRef}
+              className="mt-6 w-full bg-cyan-600 text-white py-3 rounded-lg hover:bg-cyan-700"
+            >
+              Proceed to Checkout
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );
