@@ -1,7 +1,7 @@
-/* src/pages/Cart.jsx */
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
+import { Trash2 } from 'lucide-react';
 
 const Cart = () => {
   const [cart, setCart] = useState([]);
@@ -39,6 +39,19 @@ const Cart = () => {
     return product ? (product.price * item.quantity).toFixed(2) : '0.00';
   };
 
+  const handleDelete = async (productId) => {
+    try {
+      await fetch(`${import.meta.env.VITE_API_URL}/api/cart/delete`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ productId }),
+      });
+      setCart(prev => prev.filter(item => item.productId !== productId));
+    } catch (err) {
+      console.error('Error deleting item from cart:', err);
+    }
+  };
+
   const cartTotal = cart
     .reduce((sum, item) => sum + parseFloat(getProductTotal(item)), 0)
     .toFixed(2);
@@ -64,14 +77,22 @@ const Cart = () => {
                 const product = products.find(p => p.id === item.productId);
                 if (!product) return <p key={idx}>Product not found</p>;
                 return (
-                  <div key={idx} className="flex items-center bg-white p-4 rounded-lg shadow mb-4">
-                    <img src={product.image_url} alt={product.name} className="w-24 h-24 object-cover rounded mr-4" />
-                    <div>
-                      <h3 className="text-lg font-semibold">{product.name}</h3>
-                      <p className="text-gray-600">${product.price}</p>
-                      <p className="text-gray-600">Qty: {item.quantity}</p>
-                      <p className="font-bold mt-2">Subtotal: ${getProductTotal(item)}</p>
+                  <div key={idx} className="flex items-center bg-white p-4 rounded-lg shadow mb-4 justify-between">
+                    <div className="flex items-center">
+                      <img src={product.image_url} alt={product.name} className="w-24 h-24 object-cover rounded mr-4" />
+                      <div>
+                        <h3 className="text-lg font-semibold">{product.name}</h3>
+                        <p className="text-gray-600">${product.price}</p>
+                        <p className="text-gray-600">Qty: {item.quantity}</p>
+                        <p className="font-bold mt-2">Subtotal: ${getProductTotal(item)}</p>
+                      </div>
                     </div>
+                    <button
+                      onClick={() => handleDelete(item.productId)}
+                      className="text-red-500 hover:text-red-700"
+                    >
+                      <Trash2 size={20} />
+                    </button>
                   </div>
                 );
               })}
