@@ -119,7 +119,7 @@ const Cart = () => {
   if (isLoading) return (
     <>
       <Navbar />
-      <div className='min-h-screen flex flex-col items-center justify-center bg-black' ref={cartRef}>
+      <div className='min-h-screen flex flex-col items-center justify-center bg-black future-font' ref={cartRef}>
         <div className='mt-20 flex flex-col items-center'>
           <div className='relative w-16 h-16'>
             <div className='absolute top-0 left-0 w-16 h-16 border-2 border-cyan-300 rounded-full animate-ping'></div>
@@ -131,11 +131,11 @@ const Cart = () => {
     </>
   );
 
-  if (error) return <><Navbar /><div className="min-h-screen flex items-center justify-center bg-black"><p className="text-red-500">{error}</p></div></>;
+  if (error) return <><Navbar /><div className="min-h-screen flex items-center justify-center bg-black future-font"><p className="text-red-500">{error}</p></div></>;
 
   if (cart.length === 0) {
     return (
-      <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center">
+      <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center future-font">
         <Navbar />
         <div ref={emptyRef} className="text-center">
           <p className="text-2xl text-cyan-300 mb-6">Your cart is empty</p>
@@ -152,9 +152,9 @@ const Cart = () => {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white overflow-hidden relative">
+    <div className="min-h-screen bg-black text-white overflow-hidden relative future-font">
       <Navbar />
-      <div className="container mx-auto p-4 pt-24" ref={cartRef}>
+      <div className="container mx-auto p-4 pt-24 future-font" ref={cartRef}>
         <h1 className="text-3xl font-bold mb-6">Your Cart</h1>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>

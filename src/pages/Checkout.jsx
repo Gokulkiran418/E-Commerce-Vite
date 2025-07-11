@@ -117,7 +117,7 @@ const Checkout = () => {
   };
 
   return (
-    <div className="bg-black min-h-screen text-white font-sans overflow-x-hidden relative">
+    <div className="bg-black min-h-screen text-white font-sans overflow-x-hidden relative future-font">
       <Navbar />
       <div ref={containerRef} className="max-w-6xl mx-auto p-4 pt-24">
         <h1 className="text-4xl font-bold mb-8 text-center text-cyan-300">Review & Complete Your Order</h1>

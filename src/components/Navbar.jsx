@@ -41,7 +41,7 @@ const Navbar = () => {
   const navLinks = ['Home', 'Products', 'Cart', 'Checkout'];
 
   return (
-    <nav className="bg-black fixed w-full top-0 z-20 shadow-md border-b border-cyan-500">
+    <nav className="bg-black fixed w-full top-0 z-20 shadow-md border-b border-cyan-500 future-font">
       <div className="container mx-auto flex justify-between items-center p-4">
         <h1
           ref={logoRef}

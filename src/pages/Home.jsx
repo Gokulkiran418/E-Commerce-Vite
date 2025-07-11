@@ -96,7 +96,7 @@ const Home = () => {
         </div>
       )}
 
-      <div className="min-h-screen relative overflow-hidden bg-black" ref={bgRef}>
+      <div className="min-h-screen relative overflow-hidden bg-black future-font" ref={bgRef}>
         {/* Gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-br from-[#0f0a1d] via-[#1d0f3f] to-[#0a1d3f] opacity-50 z-0" />
 

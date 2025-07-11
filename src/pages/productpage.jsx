@@ -93,7 +93,7 @@ const ProductPage = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-black" ref={bgRef}>
+      <div className="min-h-screen flex flex-col items-center justify-center bg-black future-font" ref={bgRef}>
         <Navbar />
         <div className="mt-20 flex flex-col items-center">
           <div className="relative w-16 h-16">
@@ -108,7 +108,7 @@ const ProductPage = () => {
 
   if (error) {
     return (
-      <div ref={bgRef} className="min-h-screen bg-black">
+      <div ref={bgRef} className="min-h-screen bg-black future-font">
         <Navbar />
         <div className="container mx-auto p-4 pt-20 text-white">
           <h1 className="text-2xl font-bold mb-4">Products</h1>
@@ -119,7 +119,7 @@ const ProductPage = () => {
   }
 
   return (
-    <div ref={bgRef} className="min-h-screen relative overflow-hidden bg-black">
+    <div ref={bgRef} className="min-h-screen relative overflow-hidden bg-black future-font">
       <Navbar />
       <div className="container mx-auto p-4 pt-20">
         <h1 className="text-2xl font-bold mb-4 text-white">Products</h1>

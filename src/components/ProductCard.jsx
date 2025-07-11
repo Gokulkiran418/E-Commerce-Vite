@@ -34,7 +34,7 @@ const addToCart = () => {
 };
 
   return (
-    <div className={`border ${randomBorder} bg-black rounded-xl p-4 shadow-lg transition-all duration-500 hover:scale-105 hover:shadow-lg group`}>
+    <div className={`border ${randomBorder} bg-black rounded-xl p-4 shadow-lg transition-all duration-500 hover:scale-105 hover:shadow-lg group future-font`}>
       <img
         src={product.image_url}
         alt={product.name}
