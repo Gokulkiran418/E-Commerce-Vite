@@ -18,19 +18,20 @@ const ProductCard = ({ product, showNotification }) => {
     return borderColors[randomIndex];
   }, []);
 
-  const addToCart = () => {
-    fetch(`${import.meta.env.VITE_API_URL}/api/cart`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ productId: product.id, quantity: qty }),
+const addToCart = () => {
+  const cartId = localStorage.getItem('cartId');
+  fetch(`${import.meta.env.VITE_API_URL}/api/cart`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ productId: product.id, quantity: qty, cartId }), // ✅ include cartId
+  })
+    .then((res) => res.json())
+    .then((data) => {
+      showNotification(`${product.name} (x${qty}) added to cart`);
+      setQty(1);
     })
-      .then((res) => res.json())
-      .then((data) => {
-        showNotification(`${product.name} (x${qty}) added to cart`);
-        setQty(1); // reset
-      })
-      .catch((err) => console.error('Error adding to cart:', err));
-  };
+    .catch((err) => console.error('Error adding to cart:', err));
+};
 
   return (
     <div className={`border ${randomBorder} bg-black rounded-xl p-4 shadow-lg transition-all duration-500 hover:scale-105 hover:shadow-lg group`}>

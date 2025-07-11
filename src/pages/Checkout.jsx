@@ -12,7 +12,7 @@ const Checkout = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [message, setMessage] = useState('');
-  const [copiedCard, setCopiedCard] = useState(null); // ✅ Added here
+  const [copiedCard, setCopiedCard] = useState(null);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -36,8 +36,10 @@ const Checkout = () => {
       try {
         const [prodRes, cartRes] = await Promise.all([
           fetch(`${import.meta.env.VITE_API_URL}/api/products`),
-          fetch(`${import.meta.env.VITE_API_URL}/api/cart`),
+          fetch(`${import.meta.env.VITE_API_URL}/api/cart?cartId=${localStorage.getItem('cartId')}`),
+
         ]);
+
         const prodJson = await prodRes.json();
         const cartJson = await cartRes.json();
 
@@ -74,7 +76,11 @@ const Checkout = () => {
     const params = new URLSearchParams(location.search);
     if (params.get('success') === 'true') {
       setMessage('Payment successful!');
-      fetch(`${import.meta.env.VITE_API_URL}/api/cart/empty`, { method: 'POST' });
+      fetch(`${import.meta.env.VITE_API_URL}/api/cart/empty`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cartId: localStorage.getItem('cartId') }),
+      });
       setTimeout(() => navigate('/'), 3000);
     }
     if (params.get('canceled') === 'true') {
@@ -99,6 +105,7 @@ const Checkout = () => {
       const res = await fetch(`${import.meta.env.VITE_API_URL}/api/checkout`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cartId: localStorage.getItem('cartId') }),
       });
       const { sessionId } = await res.json();
       await stripe.redirectToCheckout({ sessionId });

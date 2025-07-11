@@ -14,6 +14,12 @@ const Cart = () => {
   const btnRef = useRef(null);
   const navigate = useNavigate();
 
+  const cartId = useRef(localStorage.getItem('cartId'));
+  if (!cartId.current) {
+    cartId.current = crypto.randomUUID();
+    localStorage.setItem('cartId', cartId.current);
+  }
+
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
@@ -21,7 +27,7 @@ const Cart = () => {
       try {
         const [productsRes, cartRes] = await Promise.all([
           fetch(`${import.meta.env.VITE_API_URL}/api/products`),
-          fetch(`${import.meta.env.VITE_API_URL}/api/cart`),
+          fetch(`${import.meta.env.VITE_API_URL}/api/cart?cartId=${cartId.current}`),
         ]);
         if (!productsRes.ok || !cartRes.ok) throw new Error('Failed to fetch data');
         setProducts(await productsRes.json());
@@ -79,32 +85,29 @@ const Cart = () => {
     await fetch(`${import.meta.env.VITE_API_URL}/api/cart/delete`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ productId })
+      body: JSON.stringify({ productId, cartId: cartId.current })
     });
   };
-// ✅ Update this in Cart.jsx
 
-const updateQuantity = async (productId, delta) => {
-  let updatedQty = 1;
+  const updateQuantity = async (productId, delta) => {
+    let updatedQty = 1;
 
-  const newCart = cart.map(item => {
-    if (item.productId === productId) {
-      updatedQty = Math.max(1, item.quantity + delta);
-      return { ...item, quantity: updatedQty };
-    }
-    return item;
-  });
+    const newCart = cart.map(item => {
+      if (item.productId === productId) {
+        updatedQty = Math.max(1, item.quantity + delta);
+        return { ...item, quantity: updatedQty };
+      }
+      return item;
+    });
 
-  setCart(newCart);
+    setCart(newCart);
 
-  await fetch(`${import.meta.env.VITE_API_URL}/api/cart/update`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ productId, quantity: updatedQty })
-  });
-};
-
-
+    await fetch(`${import.meta.env.VITE_API_URL}/api/cart/update`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ productId, quantity: updatedQty, cartId: cartId.current })
+    });
+  };
 
   const handleCheckout = async () => {
     await animate(btnRef.current, { scale: [1, 1.05, 1], duration: 400, easing: 'easeInOutSine' });
