@@ -128,7 +128,7 @@ const ProductPage = () => {
           <input
             type="text"
             placeholder="Search products..."
-            className="flex-1 p-2 border rounded-lg shadow bg-white"
+             className="flex-1 p-2 border rounded-lg shadow bg-white text-black placeholder-gray-500"
             value={filter}
             onChange={e => setFilter(e.target.value)}
           />
@@ -145,14 +145,14 @@ const ProductPage = () => {
             <label className="text-sm text-white">Min</label>
             <input
               type="number"
-              className="w-20 p-1 border rounded bg-white"
+              className="w-20 p-1 border rounded bg-white text-black placeholder-gray-500"
               value={priceRange[0]}
               onChange={e => setPriceRange([+e.target.value || 0, priceRange[1]])}
             />
             <label className="text-sm text-white">Max</label>
             <input
               type="number"
-              className="w-20 p-1 border rounded bg-white"
+              className="w-20 p-1 border rounded bg-white text-black placeholder-gray-500"
               value={priceRange[1]}
               onChange={e => setPriceRange([priceRange[0], +e.target.value || 0])}
             />
