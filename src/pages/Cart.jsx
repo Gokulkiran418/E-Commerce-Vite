@@ -82,22 +82,29 @@ const Cart = () => {
       body: JSON.stringify({ productId })
     });
   };
+// ✅ Update this in Cart.jsx
 
-  const updateQuantity = async (productId, delta) => {
-    setCart(prev => prev.map(item => {
-      if (item.productId === productId) {
-        const newQty = Math.max(1, item.quantity + delta);
-        return { ...item, quantity: newQty };
-      }
-      return item;
-    }));
+const updateQuantity = async (productId, delta) => {
+  let updatedQty = 1;
 
-    await fetch(`${import.meta.env.VITE_API_URL}/api/cart/update`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ productId, delta }),
-    });
-  };
+  const newCart = cart.map(item => {
+    if (item.productId === productId) {
+      updatedQty = Math.max(1, item.quantity + delta);
+      return { ...item, quantity: updatedQty };
+    }
+    return item;
+  });
+
+  setCart(newCart);
+
+  await fetch(`${import.meta.env.VITE_API_URL}/api/cart/update`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ productId, quantity: updatedQty })
+  });
+};
+
+
 
   const handleCheckout = async () => {
     await animate(btnRef.current, { scale: [1, 1.05, 1], duration: 400, easing: 'easeInOutSine' });

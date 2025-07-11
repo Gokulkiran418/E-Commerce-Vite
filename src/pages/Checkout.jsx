@@ -12,9 +12,24 @@ const Checkout = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [message, setMessage] = useState('');
+  const [copiedCard, setCopiedCard] = useState(null); // ✅ Added here
+
   const navigate = useNavigate();
   const location = useLocation();
   const containerRef = useRef(null);
+
+  const cards = [
+    { label: 'Success', number: '4242 4242 4242 4242' },
+    { label: 'Low funds', number: '4000 0000 0000 9995' },
+    { label: 'Card declined', number: '4000 0000 0000 0002' },
+  ];
+
+  const handleCopy = (cardNumber) => {
+    navigator.clipboard.writeText(cardNumber).then(() => {
+      setCopiedCard(cardNumber);
+      setTimeout(() => setCopiedCard(null), 2000);
+    });
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -25,8 +40,20 @@ const Checkout = () => {
         ]);
         const prodJson = await prodRes.json();
         const cartJson = await cartRes.json();
+
+        const aggregated = Object.values(
+          (cartJson.cart || []).reduce((acc, item) => {
+            if (acc[item.productId]) {
+              acc[item.productId].quantity += item.quantity;
+            } else {
+              acc[item.productId] = { ...item };
+            }
+            return acc;
+          }, {})
+        );
+
         setProducts(prodJson);
-        setCart(cartJson.cart || []);
+        setCart(aggregated);
       } catch {
         setError('Failed to load order summary.');
       }
@@ -136,17 +163,17 @@ const Checkout = () => {
             <p className="text-sm text-cyan-400 mt-2 text-center">Secure payment powered by Stripe</p>
 
             <div className="mt-6 bg-black border border-yellow-500 p-4 rounded-lg text-sm text-yellow-300">
-              <p className="font-semibold mb-2">💳 Stripe Test Payment</p>
+              <p className="font-semibold mb-1">💳 Stripe Test Payment</p>
+              <p className="text-yellow-400 mb-2 text-xs">Add any for other details</p>
+              <p className="text-yellow-400 mb-4 text-xs">
+                {copiedCard ? 'Copied' : 'Click to copy the card number'}
+              </p>
               <ul className="list-disc list-inside space-y-1">
-                <li>
-                  <span className="font-medium">Success:</span> 4242 4242 4242 4242 any future expiry, CVC, ZIP, any email, any name
-                </li>
-                <li>
-                  <span className="font-medium">Insufficient funds:</span> 4000 0000 0000 9995 any future expiry, CVC, ZIP, any email, any name
-                </li>
-                <li>
-                  <span className="font-medium">Card declined:</span> 4000 0000 0000 0002 any future expiry, CVC, ZIP, any email, any name
-                </li>
+                {cards.map(({ label, number }) => (
+                  <li key={number} className="cursor-pointer hover:text-yellow-200" onClick={() => handleCopy(number)}>
+                    <span className="font-medium">{label}:</span> {number}
+                  </li>
+                ))}
               </ul>
             </div>
 
