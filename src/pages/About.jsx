@@ -3,6 +3,7 @@ import { animate, stagger } from 'animejs';
 import Lottie from 'lottie-react';
 import * as THREE from 'three';
 import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
 
 const About = () => {
   const [lottieData, setLottieData] = useState(null);
@@ -95,7 +96,7 @@ const About = () => {
   }, []);
 
   return (
-    <div className="relative min-h-screen bg-black text-white overflow-hidden about-page">
+    <div className="relative min-h-screen bg-black text-white overflow-hidden future-font">
       <div ref={threeRef} className="absolute inset-0 z-0" />
 
       <Navbar />
@@ -169,6 +170,7 @@ const About = () => {
           </div>
         )}
       </div>
+      <Footer />
     </div>
   );
 };

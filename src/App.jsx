@@ -8,6 +8,7 @@ import ProductPage from './pages/productpage';
 import About from './pages/About';
 import './index.css';
 
+
 function App() {
   const [notification, setNotification] = useState('');
 

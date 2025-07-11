@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import { Trash2 } from 'lucide-react';
 import { animate } from 'animejs';
+import Footer from '../components/Footer';
 
 const Cart = () => {
   const [cart, setCart] = useState([]);
@@ -116,28 +117,40 @@ const Cart = () => {
 
   const cartTotal = cart.reduce((sum, item) => sum + parseFloat(getProductTotal(item)), 0).toFixed(2);
 
-  if (isLoading) return (
-    <>
+if (isLoading) {
+  return (
+    <div className="min-h-screen flex flex-col bg-black future-font" ref={cartRef}>
       <Navbar />
-      <div className='min-h-screen flex flex-col items-center justify-center bg-black future-font' ref={cartRef}>
-        <div className='mt-20 flex flex-col items-center'>
-          <div className='relative w-16 h-16'>
-            <div className='absolute top-0 left-0 w-16 h-16 border-2 border-cyan-300 rounded-full animate-ping'></div>
-            <div className='absolute top-0 left-0 w-16 h-16 border-2 border-pink-300 border-dashed rounded-full animate-spin'></div>
-          </div>
-          <p className='mt-4 text-lg text-white animate-pulse'>Loading cart...</p>
+      <div className="flex-grow flex flex-col items-center justify-center">
+        <div className="relative w-16 h-16">
+          <div className="absolute top-0 left-0 w-16 h-16 border-2 border-cyan-300 rounded-full animate-ping"></div>
+          <div className="absolute top-0 left-0 w-16 h-16 border-2 border-pink-300 border-dashed rounded-full animate-spin"></div>
         </div>
+        <p className="mt-4 text-lg text-white animate-pulse">Loading cart...</p>
       </div>
-    </>
+      <Footer />
+    </div>
   );
+}
 
-  if (error) return <><Navbar /><div className="min-h-screen flex items-center justify-center bg-black future-font"><p className="text-red-500">{error}</p></div></>;
+if (error) {
+  return (
+    <div className="min-h-screen flex flex-col bg-black future-font">
+      <Navbar />
+      <div className="flex-grow flex items-center justify-center">
+        <p className="text-red-500">{error}</p>
+      </div>
+      <Footer />
+    </div>
+  );
+}
 
-  if (cart.length === 0) {
-    return (
-      <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center future-font">
-        <Navbar />
-        <div ref={emptyRef} className="text-center">
+if (cart.length === 0) {
+  return (
+    <div className="min-h-screen bg-black text-white flex flex-col future-font" ref={emptyRef}>
+      <Navbar />
+      <div className="flex-grow flex flex-col items-center justify-center">
+        <div className="text-center">
           <p className="text-2xl text-cyan-300 mb-6">Your cart is empty</p>
           <button
             ref={btnRef}
@@ -148,9 +161,10 @@ const Cart = () => {
           </button>
         </div>
       </div>
-    );
-  }
-
+      <Footer />
+    </div>
+  );
+}
   return (
     <div className="min-h-screen bg-black text-white overflow-hidden relative future-font">
       <Navbar />
@@ -205,6 +219,7 @@ const Cart = () => {
           </div>
         </div>
       </div>
+      <Footer />
     </div>
   );
 };

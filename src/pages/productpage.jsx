@@ -4,6 +4,7 @@ import Navbar from '../components/Navbar';
 import BackToTopButton from '../components/BackToTopButton';
 import { animate } from 'animejs';
 import Notification from '../components/Notification';
+import Footer from '../components/Footer';
 
 const ProductPage = () => {
   const [products, setProducts] = useState([]);
@@ -92,31 +93,33 @@ const ProductPage = () => {
   const categories = ['All', 'Trekking', 'Walking', 'Exclusive', 'Running', 'Sneaker'];
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-black future-font" ref={bgRef}>
-        <Navbar />
-        <div className="mt-20 flex flex-col items-center">
-          <div className="relative w-16 h-16">
-            <div className="absolute top-0 left-0 w-16 h-16 border-2 border-cyan-300 rounded-full animate-ping"></div>
-            <div className="absolute top-0 left-0 w-16 h-16 border-2 border-pink-300 border-dashed rounded-full animate-spin"></div>
-          </div>
-          <p className="mt-4 text-lg text-white animate-pulse">Chasing down the sneakers...</p>
+  return (
+    <div className="min-h-screen flex flex-col bg-black future-font" ref={bgRef}>
+      <Navbar />
+      <div className="flex-grow flex flex-col items-center justify-center">
+        <div className="relative w-16 h-16">
+          <div className="absolute top-0 left-0 w-16 h-16 border-2 border-cyan-300 rounded-full animate-ping"></div>
+          <div className="absolute top-0 left-0 w-16 h-16 border-2 border-pink-300 border-dashed rounded-full animate-spin"></div>
         </div>
+        <p className="mt-4 text-lg text-white animate-pulse">Chasing down the sneakers...</p>
       </div>
-    );
-  }
+      <Footer />
+    </div>
+  );
+}
 
-  if (error) {
-    return (
-      <div ref={bgRef} className="min-h-screen bg-black future-font">
-        <Navbar />
-        <div className="container mx-auto p-4 pt-20 text-white">
-          <h1 className="text-2xl font-bold mb-4">Products</h1>
-          <p className="text-red-500">{error}</p>
-        </div>
+if (error) {
+  return (
+    <div ref={bgRef} className="min-h-screen bg-black future-font flex flex-col">
+      <Navbar />
+      <div className="container mx-auto p-4 pt-20 text-white flex-grow">
+        <h1 className="text-2xl font-bold mb-4">Products</h1>
+        <p className="text-red-500">{error}</p>
       </div>
-    );
-  }
+      <Footer />
+    </div>
+  );
+}
 
   return (
     <div ref={bgRef} className="min-h-screen relative overflow-hidden bg-black future-font">
@@ -169,6 +172,7 @@ const ProductPage = () => {
       </div>
       <Notification message={notification} />
       <BackToTopButton />
+      <Footer />
     </div>
   );
 };
