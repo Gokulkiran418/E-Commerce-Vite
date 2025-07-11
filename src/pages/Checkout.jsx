@@ -38,7 +38,6 @@ const Checkout = () => {
         const [prodRes, cartRes] = await Promise.all([
           fetch(`${import.meta.env.VITE_API_URL}/api/products`),
           fetch(`${import.meta.env.VITE_API_URL}/api/cart?cartId=${localStorage.getItem('cartId')}`),
-
         ]);
 
         const prodJson = await prodRes.json();
@@ -70,6 +69,19 @@ const Checkout = () => {
       translateY: [30, 0],
       duration: 800,
       easing: 'easeOutCubic',
+    });
+    // Line animations
+    animate('.animated-h-line', {
+      translateX: ['-100%', '100%'],
+      duration: 4000,
+      easing: 'linear',
+      loop: true
+    });
+    animate('.animated-v-line', {
+      translateY: ['-100%', '100%'],
+      duration: 4000,
+      easing: 'linear',
+      loop: true
     });
   }, []);
 
@@ -118,9 +130,25 @@ const Checkout = () => {
   };
 
   return (
-    <div className="bg-black min-h-screen text-white font-sans overflow-x-hidden relative future-font">
+    <div className="bg-black min-h-screen text-white font-sans overflow-x-hidden relative flex flex-col future-font">
+    <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+      {/* Horizontal Lines */}
+      <div className="animated-h-line absolute top-[10%] left-0 w-full h-0.5 bg-cyan-400 opacity-20" />
+      <div className="animated-h-line absolute top-[30%] left-0 w-full h-0.5 bg-magenta-400 opacity-20" />
+      <div className="animated-h-line absolute top-1/2 left-0 w-full h-0.5 bg-lime-400 opacity-20" />
+      <div className="animated-h-line absolute top-[70%] left-0 w-full h-0.5 bg-purple-400 opacity-20" />
+      <div className="animated-h-line absolute bottom-[10%] left-0 w-full h-0.5 bg-pink-400 opacity-20" />
+
+      {/* Vertical Lines */}
+      <div className="animated-v-line absolute top-0 left-[10%] w-0.5 h-full bg-purple-400 opacity-20" />
+      <div className="animated-v-line absolute top-0 left-[30%] w-0.5 h-full bg-pink-400 opacity-20" />
+      <div className="animated-v-line absolute top-0 left-1/2 w-0.5 h-full bg-yellow-400 opacity-20" />
+      <div className="animated-v-line absolute top-0 left-[70%] w-0.5 h-full bg-cyan-400 opacity-20" />
+      <div className="animated-v-line absolute top-0 right-[10%] w-0.5 h-full bg-magenta-400 opacity-20" />
+    </div>
+
       <Navbar />
-      <div ref={containerRef} className="max-w-6xl mx-auto p-4 pt-24">
+      <div ref={containerRef} className="max-w-6xl mx-auto p-4 pt-24 flex-grow">
         <h1 className="text-4xl font-bold mb-8 text-center text-cyan-300">Review & Complete Your Order</h1>
         {error && <p className="text-red-400 mb-4 text-center">{error}</p>}
         {message && <p className="text-green-400 mb-4 text-center">{message}</p>}
@@ -184,7 +212,6 @@ const Checkout = () => {
                 ))}
               </ul>
             </div>
-
           </div>
         </div>
       </div>

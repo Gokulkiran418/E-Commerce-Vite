@@ -54,21 +54,31 @@ const Cart = () => {
   }, []);
 
   useEffect(() => {
-    if (cart.length > 0 && cartRef.current) {
-      animate(cartRef.current, { translateY: [20, 0], opacity: [0, 1], duration: 800, easing: 'easeOutExpo' });
-    }
-  }, [cart]);
+    animate('.animated-h-line', {
+      translateX: ['-100%', '100%'],
+      duration: 4000,
+      easing: 'linear',
+      loop: true,
+    });
+    animate('.animated-v-line', {
+      translateY: ['-100%', '100%'],
+      duration: 4000,
+      easing: 'linear',
+      loop: true,
+    });
+  }, []);
 
   useEffect(() => {
-    if (!isLoading && cart.length === 0) {
-      if (emptyRef.current) {
-        animate(emptyRef.current, { opacity: [0, 1], duration: 1000, easing: 'easeInOutSine' });
+    if (!isLoading && !error) {
+      if (cart.length > 0 && cartRef.current) {
+        animate(cartRef.current, { translateY: [20, 0], opacity: [0, 1], duration: 800, easing: 'easeOutExpo' });
       }
-      if (btnRef.current) {
+      if (cart.length === 0 && emptyRef.current && btnRef.current) {
+        animate(emptyRef.current, { opacity: [0, 1], duration: 1000, easing: 'easeInOutSine' });
         animate(btnRef.current, { scale: [0.9, 1.05], duration: 800, easing: 'easeOutBack' });
       }
     }
-  }, [isLoading, cart.length]);
+  }, [isLoading, error, cart.length]);
 
   const getProductTotal = (item) => {
     const product = products.find(p => p.id === item.productId);
@@ -117,58 +127,79 @@ const Cart = () => {
 
   const cartTotal = cart.reduce((sum, item) => sum + parseFloat(getProductTotal(item)), 0).toFixed(2);
 
-if (isLoading) {
-  return (
-    <div className="min-h-screen flex flex-col bg-black future-font" ref={cartRef}>
-      <Navbar />
-      <div className="flex-grow flex flex-col items-center justify-center">
-        <div className="relative w-16 h-16">
-          <div className="absolute top-0 left-0 w-16 h-16 border-2 border-cyan-300 rounded-full animate-ping"></div>
-          <div className="absolute top-0 left-0 w-16 h-16 border-2 border-pink-300 border-dashed rounded-full animate-spin"></div>
-        </div>
-        <p className="mt-4 text-lg text-white animate-pulse">Loading cart...</p>
-      </div>
-      <Footer />
-    </div>
-  );
-}
+  const animatedLines = (
+    <>
+      <div className="animated-h-line absolute top-[10%] left-0 w-full h-0.5 bg-cyan-400 opacity-20 z-10" />
+      <div className="animated-h-line absolute top-[30%] left-0 w-full h-0.5 bg-magenta-400 opacity-20 z-10" />
+      <div className="animated-h-line absolute top-1/2 left-0 w-full h-0.5 bg-lime-400 opacity-20 z-10" />
+      <div className="animated-h-line absolute top-[70%] left-0 w-full h-0.5 bg-purple-400 opacity-20 z-10" />
+      <div className="animated-h-line absolute bottom-[10%] left-0 w-full h-0.5 bg-pink-400 opacity-20 z-10" />
 
-if (error) {
-  return (
-    <div className="min-h-screen flex flex-col bg-black future-font">
-      <Navbar />
-      <div className="flex-grow flex items-center justify-center">
-        <p className="text-red-500">{error}</p>
-      </div>
-      <Footer />
-    </div>
+      <div className="animated-v-line absolute top-0 left-[10%] w-0.5 h-full bg-purple-400 opacity-20 z-10" />
+      <div className="animated-v-line absolute top-0 left-[30%] w-0.5 h-full bg-pink-400 opacity-20 z-10" />
+      <div className="animated-v-line absolute top-0 left-1/2 w-0.5 h-full bg-yellow-400 opacity-20 z-10" />
+      <div className="animated-v-line absolute top-0 left-[70%] w-0.5 h-full bg-cyan-400 opacity-20 z-10" />
+      <div className="animated-v-line absolute top-0 right-[10%] w-0.5 h-full bg-magenta-400 opacity-20 z-10" />
+    </>
   );
-}
 
-if (cart.length === 0) {
-  return (
-    <div className="min-h-screen bg-black text-white flex flex-col future-font" ref={emptyRef}>
-      <Navbar />
-      <div className="flex-grow flex flex-col items-center justify-center">
-        <div className="text-center">
-          <p className="text-2xl text-cyan-300 mb-6">Your cart is empty</p>
-          <button
-            ref={btnRef}
-            onClick={() => navigate('/products')}
-            className="bg-cyan-600 text-white px-6 py-3 rounded-lg hover:bg-cyan-700 transition-transform hover:scale-105"
-          >
-            Add Products
-          </button>
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex flex-col bg-black future-font relative overflow-hidden" ref={cartRef}>
+        {animatedLines}
+        <Navbar />
+        <div className="flex-grow flex flex-col items-center justify-center">
+          <div className="relative w-16 h-16">
+            <div className="absolute top-0 left-0 w-16 h-16 border-2 border-cyan-300 rounded-full animate-ping"></div>
+            <div className="absolute top-0 left-0 w-16 h-16 border-2 border-pink-300 border-dashed rounded-full animate-spin"></div>
+          </div>
+          <p className="mt-4 text-lg text-white animate-pulse">Loading cart...</p>
         </div>
+        <Footer />
       </div>
-      <Footer />
-    </div>
-  );
-}
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex flex-col bg-black future-font relative overflow-hidden">
+        {animatedLines}
+        <Navbar />
+        <div className="flex-grow flex items-center justify-center">
+          <p className="text-red-500">{error}</p>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (cart.length === 0) {
+    return (
+      <div className="min-h-screen bg-black text-white flex flex-col future-font relative overflow-hidden" ref={emptyRef}>
+        {animatedLines}
+        <Navbar />
+        <div className="flex-grow flex flex-col items-center justify-center">
+          <div className="text-center">
+            <p className="text-2xl text-cyan-300 mb-6">Your cart is empty</p>
+            <button
+              ref={btnRef}
+              onClick={() => navigate('/products')}
+              className="bg-cyan-600 text-white px-6 py-3 rounded-lg hover:bg-cyan-700 transition-transform hover:scale-105"
+            >
+              Add Products
+            </button>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-black text-white overflow-hidden relative future-font">
+    <div className="min-h-screen bg-black text-white overflow-hidden relative flex flex-col future-font">
+      {animatedLines}
       <Navbar />
-      <div className="container mx-auto p-4 pt-24 future-font" ref={cartRef}>
+      <div className="container mx-auto p-4 pt-24 flex-grow z-10" ref={cartRef}>
         <h1 className="text-3xl font-bold mb-6">Your Cart</h1>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>

@@ -2,9 +2,12 @@ import React, { useState, useEffect, useRef } from 'react';
 import ProductCard from '../components/ProductCard';
 import Navbar from '../components/Navbar';
 import BackToTopButton from '../components/BackToTopButton';
-import { animate } from 'animejs';
 import Notification from '../components/Notification';
 import Footer from '../components/Footer';
+import * as THREE from 'three';
+import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer';
+import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass';
+import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass';
 
 const ProductPage = () => {
   const [products, setProducts] = useState([]);
@@ -16,28 +19,84 @@ const ProductPage = () => {
   const [priceRange, setPriceRange] = useState([0, 10000]);
   const [notification, setNotification] = useState('');
   const bgRef = useRef(null);
-  const cardRefs = useRef([]);
+  const threeRef = useRef(null);
 
-  // Handler renamed to avoid shadowing
   const triggerNotification = (message) => {
     setNotification(message);
     setTimeout(() => setNotification(''), 3000);
   };
 
+  // Three.js neon wireframe cubes background (fullscreen scrollable canvas)
   useEffect(() => {
-    const colors = ['#000000','#222831', '#000000'];
-    let idx = 0;
-    const bgInterval = setInterval(() => {
-      animate(bgRef.current, {
-        backgroundColor: colors[idx % colors.length],
-        duration: 4000,
-        easing: 'easeInOutQuad'
+    const container = threeRef.current;
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.z = 10;
+
+    const renderer = new THREE.WebGLRenderer({ alpha: true });
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.domElement.style.position = 'fixed';
+    renderer.domElement.style.top = '0';
+    renderer.domElement.style.left = '0';
+    renderer.domElement.style.width = '100%';
+    renderer.domElement.style.height = '100%';
+    renderer.domElement.style.zIndex = '-1';
+    container.appendChild(renderer.domElement);
+
+    // Bloom composer
+    const composer = new EffectComposer(renderer);
+    composer.addPass(new RenderPass(scene, camera));
+    const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
+    bloomPass.threshold = 0;
+    bloomPass.strength = 1.5;
+    bloomPass.radius = 0;
+    composer.addPass(bloomPass);
+
+    // Create wireframe cubes
+    const cubes = [];
+    const geometry = new THREE.BoxGeometry(2, 2, 2);
+    const material = new THREE.MeshBasicMaterial({ color: 0x00ffff, wireframe: true, transparent: true, opacity: 0.5 });
+    for (let i = 0; i < 20; i++) {
+      const cube = new THREE.Mesh(geometry, material);
+      cube.position.set(
+        (Math.random() - 0.5) * 20,
+        (Math.random() - 0.5) * 20,
+        (Math.random() - 0.5) * 20
+      );
+      scene.add(cube);
+      cubes.push(cube);
+    }
+
+    // Animation loop
+    const animateScene = () => {
+      requestAnimationFrame(animateScene);
+      cubes.forEach((cube, idx) => {
+        cube.rotation.x += 0.001 + idx * 0.0001;
+        cube.rotation.y += 0.001 + idx * 0.0001;
       });
-      idx++;
-    }, 4500);
-    return () => clearInterval(bgInterval);
+      composer.render();
+    };
+    animateScene();
+
+    // Handle resize
+    const onResize = () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      composer.setSize(window.innerWidth, window.innerHeight);
+    };
+    window.addEventListener('resize', onResize);
+
+    return () => {
+      window.removeEventListener('resize', onResize);
+      container.removeChild(renderer.domElement);
+      renderer.dispose();
+      composer.dispose();
+    };
   }, []);
 
+  // Fetch products
   useEffect(() => {
     (async () => {
       setIsLoading(true);
@@ -56,86 +115,57 @@ const ProductPage = () => {
     })();
   }, []);
 
+  // Filtering
   useEffect(() => {
     const keyword = filter.toLowerCase();
-    const newFiltered = products.filter(p => {
-      const matchesCategory = selectedCategory === 'All' || p.category === selectedCategory;
-      const matchesSearch = p.name.toLowerCase().includes(keyword);
-      const matchesPrice = p.price >= priceRange[0] && p.price <= priceRange[1];
-      return matchesCategory && matchesSearch && matchesPrice;
-    });
-    setFilteredProducts(newFiltered);
+    setFilteredProducts(
+      products.filter(p => {
+        const matchesCategory = selectedCategory === 'All' || p.category === selectedCategory;
+        const matchesSearch   = p.name.toLowerCase().includes(keyword);
+        const matchesPrice    = p.price >= priceRange[0] && p.price <= priceRange[1];
+        return matchesCategory && matchesSearch && matchesPrice;
+      })
+    );
   }, [filter, products, selectedCategory, priceRange]);
 
+  // Card intersection animations
   useEffect(() => {
     if (!isLoading) {
-      const observer = new IntersectionObserver(
-        entries => {
-          entries.forEach(entry => {
-            if (entry.isIntersecting) {
-              animate(entry.target, {
-                opacity: [0, 1],
-                translateY: [20, 0],
-                easing: 'easeOutQuad',
-                duration: 800
-              });
-              observer.unobserve(entry.target);
-            }
-          });
-        }, { threshold: 0.1 }
-      );
+      const observer = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.style.opacity = '1';
+            entry.target.style.transform = 'translateY(0)';
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.1 });
       setTimeout(() => {
-        document.querySelectorAll('.product-card-wrapper').forEach(el => observer.observe(el));
+        document.querySelectorAll('.product-card-wrapper').forEach(el => {
+          el.style.opacity = '0';
+          el.style.transform = 'translateY(20px)';
+          observer.observe(el);
+        });
       }, 0);
     }
   }, [filteredProducts, isLoading]);
 
   const categories = ['All', 'Trekking', 'Walking', 'Exclusive', 'Running', 'Sneaker'];
 
-  if (isLoading) {
   return (
-    <div className="min-h-screen flex flex-col bg-black future-font" ref={bgRef}>
+    <div ref={bgRef} className="min-h-screen bg-black future-font relative flex flex-col">
+      <div ref={threeRef} className="z-0" />
       <Navbar />
-      <div className="flex-grow flex flex-col items-center justify-center">
-        <div className="relative w-16 h-16">
-          <div className="absolute top-0 left-0 w-16 h-16 border-2 border-cyan-300 rounded-full animate-ping"></div>
-          <div className="absolute top-0 left-0 w-16 h-16 border-2 border-pink-300 border-dashed rounded-full animate-spin"></div>
-        </div>
-        <p className="mt-4 text-lg text-white animate-pulse">Chasing down the sneakers...</p>
-      </div>
-      <Footer />
-    </div>
-  );
-}
-
-if (error) {
-  return (
-    <div ref={bgRef} className="min-h-screen bg-black future-font flex flex-col">
-      <Navbar />
-      <div className="container mx-auto p-4 pt-20 text-white flex-grow">
-        <h1 className="text-2xl font-bold mb-4">Products</h1>
-        <p className="text-red-500">{error}</p>
-      </div>
-      <Footer />
-    </div>
-  );
-}
-
-  return (
-    <div ref={bgRef} className="min-h-screen relative overflow-hidden bg-black future-font">
-      <Navbar />
-      <div className="container mx-auto p-4 pt-20">
+      <div className="container mx-auto p-4 pt-20 flex-grow relative z-10">
         <h1 className="text-2xl font-bold mb-4 text-white">Products</h1>
-
         <div className="flex flex-col sm:flex-row gap-4 mb-6">
           <input
             type="text"
             placeholder="Search products..."
-             className="flex-1 p-2 border rounded-lg shadow bg-white text-black placeholder-gray-500"
+            className="flex-1 p-2 border rounded-lg shadow bg-white text-black placeholder-gray-500"
             value={filter}
             onChange={e => setFilter(e.target.value)}
           />
-
           <select
             className="p-2 border rounded-lg shadow bg-white text-gray-800 font-semibold focus:outline-none focus:ring-2 focus:ring-cyan-500 transition duration-300"
             value={selectedCategory}
@@ -143,7 +173,6 @@ if (error) {
           >
             {categories.map((cat, idx) => <option key={idx} value={cat}>{cat}</option>)}
           </select>
-
           <div className="flex items-center gap-2">
             <label className="text-sm text-white">Min</label>
             <input
@@ -162,15 +191,17 @@ if (error) {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {filteredProducts.map((product, idx) => (
-            <div key={product.id} className="opacity-0 product-card-wrapper">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 z-20 relative">
+          {filteredProducts.map(product => (
+            <div key={product.id} className="product-card-wrapper">
               <ProductCard product={product} showNotification={triggerNotification} />
             </div>
           ))}
         </div>
       </div>
-      <Notification message={notification} />
+      <div className="absolute top-4 right-4 z-50 pointer-events-none">
+        <Notification message={notification} />
+      </div>
       <BackToTopButton />
       <Footer />
     </div>
