@@ -124,6 +124,30 @@ app.post('/api/cart/empty', async (req, res) => {
     res.status(500).json({ error: 'Failed to empty cart' });
   }
 });
+app.post('/api/cart/update', async (req, res) => {
+  const { productId, quantity } = req.body;
+  if (!productId || typeof quantity !== 'number') {
+    return res.status(400).json({ error: 'Product ID and quantity are required' });
+  }
+
+  try {
+    const check = await pool.query('SELECT * FROM cart WHERE product_id = $1', [productId]);
+
+    if (check.rows.length > 0) {
+      await pool.query('UPDATE cart SET quantity = $1 WHERE product_id = $2', [quantity, productId]);
+    } else {
+      await pool.query('INSERT INTO cart (product_id, quantity) VALUES ($1, $2)', [productId, quantity]);
+    }
+
+    const result = await pool.query('SELECT * FROM cart');
+    res.json({ message: 'Cart updated', cart: result.rows.map(item => ({ productId: item.product_id, quantity: item.quantity })) });
+  } catch (err) {
+    console.error('Error updating cart:', err.stack);
+    res.status(500).json({ error: 'Failed to update cart' });
+  }
+});
+
+
 
 app.get('/', (req, res) => {
   res.send('E-commerce Platform API');
