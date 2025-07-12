@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import ProductCard from '../components/ProductCard';
 import Navbar from '../components/Navbar';
-import BackToTopButton from '../components/BackToTopButton';
+import FloatingUIWrapper from '../components/FloatingUIWrapper';
 import { animate } from 'animejs';
-import Notification from '../components/Notification';
 import Footer from '../components/Footer';
 
 const ProductPage = () => {
@@ -15,7 +14,6 @@ const ProductPage = () => {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [priceRange, setPriceRange] = useState([0, 10000]);
   const [notification, setNotification] = useState('');
-  const bgRef = useRef(null);
   const cardRefs = useRef([]);
 
   const triggerNotification = (message) => {
@@ -23,28 +21,22 @@ const ProductPage = () => {
     setTimeout(() => setNotification(''), 3000);
   };
 
-  useEffect(() => {
-    const colors = ['#000000', '#222831', '#000000'];
-    let idx = 0;
-    const bgInterval = setInterval(() => {
-      animate(bgRef.current, {
-        backgroundColor: colors[idx % colors.length],
-        duration: 4000,
-        easing: 'easeInOutQuad',
-      });
-      idx++;
-    }, 4500);
-    return () => clearInterval(bgInterval);
-  }, []);
+ useEffect(() => {
+  animate('.animated-h-line', {
+    translateX: ['-100%', '100%'],
+    duration: 10000, // slower movement
+    easing: 'linear',
+    loop: true,
+  });
 
-  useEffect(() => {
-    animate('.animated-h-line', {
-      translateX: ['-100%', '100%'],
-      duration: 4000,
-      easing: 'linear',
-      loop: true,
-    });
-  }, []);
+  animate('.animated-v-line', {
+    translateY: ['-100%', '100%'],
+    duration: 10000, // slower movement
+    easing: 'linear',
+    loop: true,
+  });
+}, []);
+
 
   useEffect(() => {
     (async () => {
@@ -54,7 +46,6 @@ const ProductPage = () => {
         const res = await fetch(`${import.meta.env.VITE_API_URL}/api/products`);
         if (!res.ok) throw new Error('Failed to fetch products');
         const data = await res.json();
-        console.log('Fetched products:', data); // Debug: Log fetched data
         setProducts(data);
         setFilteredProducts(data);
       } catch (err) {
@@ -74,7 +65,6 @@ const ProductPage = () => {
       const matchesPrice = p.price >= priceRange[0] && p.price <= priceRange[1];
       return matchesCategory && matchesSearch && matchesPrice;
     });
-    console.log('Filtered products:', newFiltered); // Debug: Log filtered products
     setFilteredProducts(newFiltered);
   }, [filter, products, selectedCategory, priceRange]);
 
@@ -84,8 +74,6 @@ const ProductPage = () => {
         (entries) => {
           entries.forEach((entry, index) => {
             if (entry.isIntersecting) {
-              console.log(`Card ${index} intersecting`); // Debug: Log when card enters viewport
-              // Animate the entire card wrapper for visibility
               animate(entry.target, {
                 opacity: [0, 1],
                 translateY: [50, 0],
@@ -94,36 +82,6 @@ const ProductPage = () => {
                 duration: 800,
                 delay: index * 100,
               });
-              // Animate child elements
-              animate(entry.target.querySelector('.product-image'), {
-                opacity: [0, 1],
-                translateY: [20, 0],
-                scale: [0.8, 1],
-                easing: 'easeOutElastic(1, 0.8)',
-                duration: 800,
-                delay: index * 100 + 150,
-              });
-              animate(entry.target.querySelector('.product-title'), {
-                opacity: [0, 1],
-                translateX: [-20, 0],
-                easing: 'easeOutQuad',
-                duration: 800,
-                delay: index * 100 + 300,
-              });
-              animate(entry.target.querySelector('.product-price'), {
-                opacity: [0, 1],
-                translateX: [20, 0],
-                easing: 'easeOutQuad',
-                duration: 800,
-                delay: index * 100 + 450,
-              });
-              animate(entry.target.querySelector('.product-controls'), {
-                opacity: [0, 1],
-                translateY: [20, 0],
-                easing: 'easeOutQuad',
-                duration: 800,
-                delay: index * 100 + 600,
-              });
               observer.unobserve(entry.target);
             }
           });
@@ -131,40 +89,36 @@ const ProductPage = () => {
         { threshold: 0.1 }
       );
       const wrappers = document.querySelectorAll('.product-card-wrapper');
-      console.log('Found wrappers:', wrappers.length); // Debug: Log number of wrappers
       wrappers.forEach((el) => observer.observe(el));
     }
   }, [filteredProducts, isLoading]);
 
   const categories = ['All', 'Trekking', 'Walking', 'Exclusive', 'Running', 'Sneaker'];
 
-  const animatedLines = (
-    <>
-      <div className="animated-h-line hidden sm:block absolute top-[5%] left-0 w-full h-0.5 bg-teal-400 opacity-20 z-10" />
-      <div className="animated-h-line hidden sm:block absolute top-[10%] left-0 w-full h-0.5 bg-cyan-400 opacity-20 z-10" />
-      <div className="animated-h-line hidden sm:block absolute top-[15%] left-0 w-full h-0.5 bg-blue-400 opacity-20 z-10" />
-      <div className="animated-h-line hidden sm:block absolute top-[20%] left-0 w-full h-0.5 bg-indigo-400 opacity-20 z-10" />
-      <div className="animated-h-line hidden sm:block absolute top-[30%] left-0 w-full h-0.5 bg-magenta-400 opacity-20 z-10" />
-      <div className="animated-h-line hidden sm:block absolute top-[40%] left-0 w-full h-0.5 bg-orange-400 opacity-20 z-10" />
-      <div className="animated-h-line hidden sm:block absolute top-1/2 left-0 w-full h-0.5 bg-lime-400 opacity-20 z-10" />
-      <div className="animated-h-line hidden sm:block absolute top-[60%] left-0 w-full h-0.5 bg-green-400 opacity-20 z-10" />
-      <div className="animated-h-line hidden sm:block absolute top-[70%] left-0 w-full h-0.5 bg-purple-400 opacity-20 z-10" />
-      <div className="animated-h-line hidden sm:block absolute top-[80%] left-0 w-full h-0.5 bg-red-400 opacity-20 z-10" />
-      <div className="animated-h-line hidden sm:block absolute bottom-[15%] left-0 w-full h-0.5 bg-violet-400 opacity-20 z-10" />
-      <div className="animated-h-line hidden sm:block absolute bottom-[10%] left-0 w-full h-0.5 bg-pink-400 opacity-20 z-10" />
-      <div className="animated-h-line hidden sm:block absolute bottom-[5%] left-0 w-full h-0.5 bg-amber-400 opacity-20 z-10" />
+const animatedLines = (
+  <>
+    {/* Horizontal Lines */}
+    {[...Array(20)].map((_, i) => (
+      <div
+        key={`h-${i}`}
+        className={`animated-h-line hidden sm:block absolute top-[${5 * i}%] left-0 w-full h-0.5 bg-cyan-400 opacity-10 z-10`}
+      />
+    ))}
 
-      <div className="animated-v-line hidden sm:block absolute top-0 left-[10%] w-0.5 h-full bg-purple-400 opacity-20 z-10" />
-      <div className="animated-v-line hidden sm:block absolute top-0 left-[30%] w-0.5 h-full bg-pink-400 opacity-20 z-10" />
-      <div className="animated-v-line hidden sm:block absolute top-0 left-1/2 w-0.5 h-full bg-yellow-400 opacity-20 z-10" />
-      <div className="animated-v-line hidden sm:block absolute top-0 left-[70%] w-0.5 h-full bg-cyan-400 opacity-20 z-10" />
-      <div className="animated-v-line hidden sm:block absolute top-0 right-[10%] w-0.5 h-full bg-magenta-400 opacity-20 z-10" />
-    </>
-  );
+    {/* Vertical Lines */}
+    {[...Array(20)].map((_, i) => (
+      <div
+        key={`v-${i}`}
+        className={`animated-v-line hidden sm:block absolute top-0 left-[${5 * i}%] w-0.5 h-full bg-cyan-400 opacity-10 z-10`}
+      />
+    ))}
+  </>
+);
+
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex flex-col bg-black future-font relative overflow-hidden" ref={bgRef}>
+      <div className="min-h-screen flex flex-col bg-black future-font relative overflow-hidden">
         {animatedLines}
         <Navbar />
         <div className="flex-grow flex flex-col items-center justify-center">
@@ -181,7 +135,7 @@ const ProductPage = () => {
 
   if (error) {
     return (
-      <div ref={bgRef} className="min-h-screen bg-black future-font flex flex-col relative overflow-hidden">
+      <div className="min-h-screen bg-black future-font flex flex-col relative overflow-hidden">
         {animatedLines}
         <Navbar />
         <div className="container mx-auto p-4 pt-20 text-white flex-grow">
@@ -194,7 +148,7 @@ const ProductPage = () => {
   }
 
   return (
-    <div ref={bgRef} className="min-h-screen relative overflow-hidden bg-black future-font flex flex-col">
+    <div className="min-h-screen relative overflow-hidden bg-black future-font flex flex-col">
       {animatedLines}
       <Navbar />
       <div className="container mx-auto p-4 pt-20 flex-grow">
@@ -243,7 +197,7 @@ const ProductPage = () => {
           {filteredProducts.length === 0 ? (
             <p className="text-white text-center col-span-full">No products found.</p>
           ) : (
-            filteredProducts.map((product, idx) => (
+            filteredProducts.map((product) => (
               <div key={product.id} className="product-card-wrapper z-10">
                 <ProductCard product={product} showNotification={triggerNotification} />
               </div>
@@ -251,8 +205,7 @@ const ProductPage = () => {
           )}
         </div>
       </div>
-      <Notification message={notification} />
-      <BackToTopButton />
+      <FloatingUIWrapper notificationMessage={notification} />
       <Footer />
     </div>
   );
