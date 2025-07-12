@@ -19,7 +19,7 @@ const ProductCard = ({ product, showNotification }) => {
   }, []);
 
   const addToCart = () => {
-    const cartId = localStorage.getItem('cartId');
+    const cartId = typeof window !== 'undefined' ? localStorage.getItem('cartId') : null;
     fetch(`${import.meta.env.VITE_API_URL}/api/cart`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -38,13 +38,13 @@ const ProductCard = ({ product, showNotification }) => {
       <img
         src={product.image_url}
         alt={product.name}
-        className="product-image w-full h-48 object-cover rounded-md mb-4 transition-transform duration-500 group-hover:scale-105" loading="lazy"
+        className="product-image w-full h-48 object-cover rounded-md mb-4 transition-transform duration-500 group-hover:scale-105"
+        loading="lazy" // Added for performance
       />
       <h2 className="product-title text-lg font-semibold text-white transition-transform duration-300 group-hover:scale-105">
         {product.name}
       </h2>
       <p className="product-price text-white font-medium mb-2">${product.price}</p>
-
       <div className="product-controls flex flex-col space-y-2">
         <div className="flex items-center space-x-2">
           <button
