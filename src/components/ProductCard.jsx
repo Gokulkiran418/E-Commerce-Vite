@@ -10,7 +10,7 @@ const ProductCard = ({ product, showNotification }) => {
     'border-blue-500',
     'border-green-500',
     'border-yellow-500',
-    'border-emerald-400'
+    'border-emerald-400',
   ];
 
   const randomBorder = useMemo(() => {
@@ -18,58 +18,56 @@ const ProductCard = ({ product, showNotification }) => {
     return borderColors[randomIndex];
   }, []);
 
-const addToCart = () => {
-  const cartId = localStorage.getItem('cartId');
-  fetch(`${import.meta.env.VITE_API_URL}/api/cart`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ productId: product.id, quantity: qty, cartId }), // ✅ include cartId
-  })
-    .then((res) => res.json())
-    .then((data) => {
-      showNotification(`${product.name} (x${qty}) added to cart`);
-      setQty(1);
+  const addToCart = () => {
+    const cartId = localStorage.getItem('cartId');
+    fetch(`${import.meta.env.VITE_API_URL}/api/cart`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ productId: product.id, quantity: qty, cartId }),
     })
-    .catch((err) => console.error('Error adding to cart:', err));
-};
+      .then((res) => res.json())
+      .then((data) => {
+        showNotification(`${product.name} (x${qty}) added to cart`);
+        setQty(1);
+      })
+      .catch((err) => console.error('Error adding to cart:', err));
+  };
 
   return (
     <div className={`border ${randomBorder} bg-black rounded-xl p-4 shadow-lg transition-all duration-500 hover:scale-105 hover:shadow-lg group future-font`}>
       <img
         src={product.image_url}
         alt={product.name}
-        className="w-full h-48 object-cover rounded-md mb-4 transition-transform duration-500 group-hover:scale-105"
+        className="product-image w-full h-48 object-cover rounded-md mb-4 transition-transform duration-500 group-hover:scale-105" loading="lazy"
       />
-      <h2 className="text-lg font-semibold text-white transition-transform duration-300 group-hover:scale-105">
+      <h2 className="product-title text-lg font-semibold text-white transition-transform duration-300 group-hover:scale-105">
         {product.name}
       </h2>
-      <p className="text-white font-medium mb-2">
-        ${product.price}
-      </p>
+      <p className="product-price text-white font-medium mb-2">${product.price}</p>
 
-      {/* Quantity selector */}
-      <div className="flex items-center space-x-2 mb-4">
+      <div className="product-controls flex flex-col space-y-2">
+        <div className="flex items-center space-x-2">
+          <button
+            onClick={() => setQty((q) => Math.max(1, q - 1))}
+            className="px-2 py-1 bg-gray-800 rounded-md text-white hover:bg-gray-700"
+          >
+            –
+          </button>
+          <span className="w-8 text-center text-white">{qty}</span>
+          <button
+            onClick={() => setQty((q) => q + 1)}
+            className="px-2 py-1 bg-gray-800 rounded-md text-white hover:bg-gray-700"
+          >
+            +
+          </button>
+        </div>
         <button
-          onClick={() => setQty(q => Math.max(1, q - 1))}
-          className="px-2 py-1 bg-gray-800 rounded-md text-white hover:bg-gray-700"
+          onClick={addToCart}
+          className="bg-cyan-500 text-white px-4 py-2 rounded-md hover:bg-cyan-600 transition-colors duration-300"
         >
-          –
-        </button>
-        <span className="w-8 text-center text-white">{qty}</span>
-        <button
-          onClick={() => setQty(q => q + 1)}
-          className="px-2 py-1 bg-gray-800 rounded-md text-white hover:bg-gray-700"
-        >
-          +
+          Add {qty > 1 ? `x${qty}` : ''} to Cart
         </button>
       </div>
-
-      <button
-        onClick={addToCart}
-        className="mt-3 bg-cyan-500 text-white px-4 py-2 rounded-md hover:bg-cyan-600 transition-colors duration-300"
-      >
-        Add {qty > 1 ? `x${qty}` : ''} to Cart
-      </button>
     </div>
   );
 };
