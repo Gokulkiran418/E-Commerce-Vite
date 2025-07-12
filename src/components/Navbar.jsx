@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { animate, stagger } from 'animejs';
 import { Menu, X } from 'lucide-react';
 
@@ -7,6 +8,7 @@ const Navbar = () => {
   const linkRefs = useRef([]);
   const mobileMenuRef = useRef(null);
   const [menuOpen, setMenuOpen] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     animate(logoRef.current, {
@@ -38,7 +40,17 @@ const Navbar = () => {
 
   const toggleMenu = () => setMenuOpen(prev => !prev);
 
-  const navLinks = ['Home', 'Products', 'Cart', 'Checkout'];
+  const navLinks = [
+    { label: 'Home', path: '/' },
+    { label: 'Products', path: '/products' },
+    { label: 'Cart', path: '/cart' },
+    { label: 'About', path: '/about' },
+  ];
+
+  const handleNavClick = (path) => {
+    setMenuOpen(false);
+    navigate(path);
+  };
 
   return (
     <nav className="bg-black fixed w-full top-0 z-20 shadow-md border-b border-cyan-500 future-font">
@@ -52,15 +64,15 @@ const Navbar = () => {
 
         {/* Desktop nav */}
         <div className="hidden md:flex space-x-6">
-          {navLinks.map((label, index) => (
-            <a
+          {navLinks.map(({ label, path }, index) => (
+            <button
               key={label}
               ref={el => (linkRefs.current[index] = el)}
-              href={`/${label === 'Home' ? '' : label.toLowerCase()}`}
+              onClick={() => handleNavClick(path)}
               className="text-white hover:text-cyan-300 transition-colors duration-200 text-lg"
             >
               {label}
-            </a>
+            </button>
           ))}
         </div>
 
@@ -79,15 +91,14 @@ const Navbar = () => {
           ref={mobileMenuRef}
           className="md:hidden overflow-hidden px-4 pb-4 border-t border-cyan-800 bg-black"
         >
-          {navLinks.map(label => (
-            <a
+          {navLinks.map(({ label, path }) => (
+            <button
               key={label}
-              href={`/${label === 'Home' ? '' : label.toLowerCase()}`}
-              className="block text-white py-2 text-lg hover:text-cyan-300"
-              onClick={() => setMenuOpen(false)}
+              onClick={() => handleNavClick(path)}
+              className="block w-full text-left text-white py-2 text-lg hover:text-cyan-300"
             >
               {label}
-            </a>
+            </button>
           ))}
         </div>
       )}
