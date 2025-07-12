@@ -122,7 +122,7 @@ const Home = () => {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-6 justify-center mb-12">
-            {['Products','Cart','Checkout'].map((label) => (
+            {['Products','Cart','Checkout','About'].map((label) => (
               <button
                 key={label}
                 className="futuristic-btn px-12 py-4 bg-white bg-opacity-20 backdrop-blur-md text-white text-lg font-bold rounded-xl border border-white border-opacity-30 hover:bg-opacity-30 transition"
