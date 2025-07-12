@@ -3,6 +3,10 @@
 @tailwind components;
 @tailwind utilities;
 
+/* index.css */
+html {
+  scroll-behavior: smooth;
+}
 .future-font {
   font-family: 'Orbitron', sans-serif;
 }
