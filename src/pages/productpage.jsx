@@ -44,14 +44,6 @@ const ProductPage = () => {
       easing: 'linear',
       loop: true,
     });
-    if (!isMobile) {
-      animate('.animated-v-line', {
-        translateY: ['-100%', '100%'],
-        duration: 4000,
-        easing: 'linear',
-        loop: true,
-      });
-    }
   }, []);
 
   useEffect(() => {
