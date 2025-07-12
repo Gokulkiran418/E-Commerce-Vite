@@ -4,6 +4,7 @@ const Footer = () => (
     <div className="container mx-auto px-4 text-center">
       <div className="flex justify-center gap-8 mb-6 opacity-80">
         <a href="/about" className="hover:text-white">About</a>
+        <a href="https://github.com/Gokulkiran418/E-Commerce-Vite.git" target="_blank" className="hover:text-white">GitHub</a>
       </div>
       <p className="opacity-60">&copy; {new Date().getFullYear()} E‑Shop Futuristic</p>
     </div>
