@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { isMobile } from 'react-device-detect';
 import ProductCard from '../components/ProductCard';
 import Navbar from '../components/Navbar';
 import BackToTopButton from '../components/BackToTopButton';
